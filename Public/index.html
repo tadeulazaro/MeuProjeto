@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Notepad</title>
+    <style>
+        textarea {
+            width: 100%;
+            height: 90vh;
+        }
+    </style>
+</head>
+<body>
+    <textarea id="notepad" placeholder="Type here..."></textarea>
+
+    <script>
+        // Conectar ao servidor WebSocket
+        const socket = new WebSocket('ws://localhost:5000');
+        const notepad = document.getElementById('notepad');
+
+        socket.addEventListener('open', () => {
+            console.log('Connected to WebSocket');
+        });
+
+        // Adicionar um ouvinte de eventos para mensagens recebidas
+        socket.addEventListener('message', (event) => {
+            // Extrair os dados do evento e definir o valor da textarea
+            const reader = new FileReader();
+            reader.onload = function() {
+                notepad.value = reader.result;
+            };
+            reader.readAsText(event.data);
+        });
+
+        // Adicionar um ouvinte de eventos para quando o texto é inserido na textarea
+        notepad.addEventListener('input', () => {
+            socket.send(notepad.value);
+        });
+    </script>
+</body>
+</html>
